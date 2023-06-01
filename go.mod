@@ -1,3 +1,3 @@
 module ducha.com/boringtest
 
-go 1.18
+go 1.17

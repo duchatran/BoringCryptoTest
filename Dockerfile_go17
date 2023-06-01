@@ -1,0 +1,23 @@
+# This is for Google BoringCrypto using Go17
+FROM us-docker.pkg.dev/google.com/api-project-999119582588/go-boringcrypto/golang:1.17.13b7 as builder
+RUN apt-get update
+RUN apt-get install -y ca-certificates git openssh-client openssh-server jq
+RUN rm -rf /var/lib/apt/lists/*
+
+WORKDIR /build
+
+# Build
+COPY . /build
+RUN go mod download
+RUN CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -o main
+
+# Create final image
+FROM debian:stable-slim
+WORKDIR /
+RUN apt-get update && apt-get install -y ca-certificates
+RUN rm -rf /var/lib/apt/lists/*
+COPY --from=builder /build/* .
+EXPOSE 8443
+CMD ["./main"]
+
+
